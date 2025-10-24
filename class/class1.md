@@ -1,5 +1,11 @@
 # cebrap.lab - IA em R e python
 
+## 1o encontro
+
+Data: 24 de Outubro de 2025
+Horário: 17 às 19h
+Local: CEBRAP
+
 ### Objetivo
 
 Nosso objetivo nos dois primeiros encontros do curso será habituar todas e todos no uso de uma das linguagens, R ou python, e compreendermos como coletar/construir e preparar coleções de documentos para o uso de Large Language Models com parâmetros disponíveis ao público e/ou API de serviços de LLM.
