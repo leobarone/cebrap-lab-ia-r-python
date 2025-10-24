@@ -1,10 +1,10 @@
-# Apresentação
+# Tutorial Inicial - Manipulação de dados com **dplyr**
 
 Um dos aspectos mais incríveis da linguagem R é o desenvolvimento de novas funcionalidades pela comunidade de usuárias e usuários. 
 
 Há diversas "gramática para bases de dados", ou seja, formas de importar, organizar, manipular e extrair informações das bases de dados, que foram desenvolvidas ao longo da última década.
 
-A "gramática" mais popular da linguagem é a do no pacote _dplyr_, parte do _tidyverse_. Neste oficina veremos como utilizar algumas das principais funções, ou "verbos", do pacote _dplyr_.
+A "gramática" mais popular da linguagem é a do pacote _dplyr_, parte do _tidyverse_. Nesta oficina veremos como utilizar algumas das principais funções, ou "verbos", do pacote _dplyr_.
 
 Existem outras formas de se trabalhar com conjuntos de dados mais, digamos, antigas. É comum encontrarmos códigos escritos na "gramática" original da linguagem, que chamaremos de "base" ou "básico".
 
@@ -14,17 +14,17 @@ Podemos pensar na linguagem R como uma língua com diversos dialétos. Os dois d
 
 Quando você abre R ou RStudio, diversas funções estão disponíveis para uso. Elas são parte do pacote "base", que é carregado automaticamente. "base" é a linguagem tal como ela foi desenhada originalmente.
 
-Se quiseremos utilizar funções de pacotes desenvolvidos na comunidade de R que não sejam parte do "base", precisamos instalar _pacotes_ e carregá-los ao inicial a seção. Vamos ver como fazer isso.
+Se quiseremos utilizar funções de pacotes desenvolvidos na comunidade de R que não sejam parte do "base", precisamos instalar _pacotes_ e carregá-los ao iniciar a seção. Vamos ver como fazer isso.
 
 Em primeiro lugar, vamos instalar um pacote. Começaremos com o _dplyr_
 
 ```{r}
-# install.packages('dplyr')
+install.packages('dplyr')
 ```
 
 Lembre-se de colocar aspas no nome do pacote, pois, até agora, _dplyr_ é um nome desconhecido para a linguagem R no seu computador.
 
-A partir da instalação, sempre que queremos utilizar o pacote _dplyr_ devemos carregá-lo com a função _library_. Você deve fazer isso toda vez que abrir R.
+Após a instalação, sempre que queremos utilizar o pacote _dplyr_ devemos carregá-lo com a função _library_. Você deve fazer isso toda vez que abrir R.
 
 ```{r}
 library(dplyr)
@@ -76,33 +76,35 @@ Vamos ver como o R representa vetores e data frames na tela. Antes disso, é pre
 
 Neste tutorial vamos trabalhar com as bases de dados da educação municipal da cidade de São Paulo. Em particular, vamos começar trabalhando com o  cadastro de escolas da Prefeitura de São Paulo.
 
-A página na qual você encontrará o cadastro de escolas é essa aqui [aqui](http://dados.prefeitura.sp.gov.br/pt_PT/dataset/cadastro-de-escolas-municipais-conveniadas-e-privadas). Comece baixando o dicionário de dados e os dados mais atuais.
+A página na qual você encontrará o cadastro de escolas é essa aqui [aqui](https://dados.prefeitura.sp.gov.br/dataset/cadastro-de-escolas-municipais-conveniadas-e-privadas). Comece baixando o dicionário de dados e os dados mais atuais.
 
-## Abrindo dados em R com botão (aaaaaaargh!)
+## Abrindo dados em R com botão
 
 Se você decidiu aprender a programar em R, provavelmente quer substituir a análise de dados com cliques no mouse que fazemos no editor de planilhas pela construção de scripts que documentam o passo a passo da análise. Daqui em diante estaremos num mundo sem botões. Exceto um, por enquanto, aí no canto direito superior chamado "Import Dataset".
 
-Clique no botão (aaaaaaargh!). Veja que temos a opção de importar arquivos de texto com duas bibliotecas diferentes, _base_ e _readr_ (que é o pacote de abertura de dados do _tidyverse_) e dados em alguns outros formatos, como MS Excel e outros softwares de análise estatística.
+Clique no botão. Veja que temos a opção de importar arquivos de texto com duas bibliotecas diferentes, _base_ e _readr_ (que é o pacote de abertura de dados do _tidyverse_) e dados em alguns outros formatos, como MS Excel e outros softwares de análise estatística.
 
 Use a primeira opção, "From Text (base)" para carregar os dados do cadastro de escola.
 
 ## Abrindo dados em R (com script)
 
-(Lembre-se de carregar o pacote _tidyverse_ antes de prosseguir)
+
+(Lembre-se de instalar e carregar o pacote _tidyverse_ antes de prosseguir)
 
 ```{r}
+install.packages('tidyverse')
 library(tidyverse)
 ```
 
 Use o recurso "Import Dataset" enquanto não se sentir confortável com a linguagem. Mas, aos poucos, vá abandonando. Abrir dados em R é muito simples.
 
-Repetindo o procedimento, para abrir o cadastro de escola basta fazer:
+Repetindo o procedimento com código, para abrir o cadastro de escola basta fazer:
 
 ```{r}
 escolas <- read_csv2("https://dados.prefeitura.sp.gov.br/dataset/8da55b0e-b385-4b54-9296-d0000014ddd5/resource/533188c6-1949-4976-ac4e-acd313415cd1/download/escolas122024.csv")
 ```
 
-Em R, as funções "read." são as funções de abertura de dados do _base_ e as funções "read_" são as análogas do pacote _readr_, parte do _tidyverse_. Há funções "read" para abrir todos os tipos de dados, de arquivos de texto a páginas em HTML.
+Em R, as funções "read." são as funções de abertura de dados do _base_ e as funções "read_" são as análogas do pacote _readr_, parte do _tidyverse_. Há funções "read" para abrir/ler/carregar todos os tipos de dados, de arquivos de texto a páginas em HTML.
 
 No nosso caso, utilizamos a função _read\_csv2_ para abrir um arquivo de texto cujos valores das colunas são separados por vírgula. Infelizmente, não há tempo para aprender sobre as variedades das funções de abertura de dados, mas você pode aprender um pouco mais [aqui](https://jonnyphillips.github.io/FLS6397_2019/tutorials/tutorial04.html) ou [aqui](https://r4ds.had.co.nz/data-import.html).
 
@@ -115,9 +117,9 @@ url_escolas <- "https://dados.prefeitura.sp.gov.br/dataset/8da55b0e-b385-4b54-92
 escolas <- read_csv2(url_escolas)
 ```
 
-Note que, pela segunda vez, utilizamos o símbolo "<-". Ele é um símbolo de atribuição, e é um das marcas mais importantes da linguagem. Atribuir, significa "guardar na memória com um nome". O nome, é o que vai do lado esquerdo. A parte do lado direito da equação de atribuição é o objeto a ser guardado.
+Note que, pela segunda vez, utilizamos o símbolo "<-". Ele é um símbolo de atribuição, e é um das marcas mais importantes da linguagem. Atribuir, significa "guardar na memória com um nome". O nome é o que vai do lado esquerdo. A parte do lado direito da equação de atribuição é o objeto a ser guardado.
 
-Você pode usar "=" no lugar de "<-". Mas, avisamos desde já, há casos em que há ambiguidade e os símbolos não funcionam como esperado.
+Você pode usar "=" no lugar de "<-". Mas, aviso desde já, há casos em R em que há ambiguidade e os símbolos não funcionam como esperado.
 
 Vamos avançar.
 
@@ -125,7 +127,7 @@ Vamos avançar.
 
 No editor de planilhas estamos acostumados a ver os dados, célula a célula. Mas será que é realmente útil ficar olhando para os dados? Você perceberá com o tempo que olhar os dados é desnecessário e até contraproducente.
 
-Você pode ver os dados clicando (aaaaaaargh!) no nome do objeto que está no "Environment" ou utilizando a função _View_ (cuidado, o "V" é maiúsculo, algo raro em nomes de funções de R).
+Você pode ver os dados clicando no nome do objeto que está no "Environment" ou utilizando a função _View_ (cuidado, o "V" é maiúsculo, algo raro em nomes de funções de R).
 
 ```{r}
 View(escolas)
@@ -141,7 +143,7 @@ head(escolas)
 
 Com apenas as 6 primeiras linhas do data frame temos noção de todo o conjunto. Sabemos rapidamente que existem informações sobre o nome das escolas, seus códigos de cadastro, de que tipo de escola se trata, à qual diretoria regional de ensino (DRE) pertence, etc.
 
-Quantas escolas há? Há tantas escolas quantas linhas nos dados. Com _nrow_ descobrimos quantas são.
+Quantas escolas há? Há tantas escolas quanto linhas no data frame. Com _nrow_ descobrimos quantas são.
 
 ```{r}
 nrow(escolas)
@@ -204,7 +206,7 @@ Vamos agora renomear os dados.
 
 ## Renomeando variáveis
 
-Quando trabalhamos com dados que não coletamos, em geral, não vamos gostar dos nomes das variáveis que quem produziu os dados escolheu. Mais ainda, com certa frequência, obtemos dados cujos nomes das colunas são compostos ou contêm acentuação, cecedilha e demais caracteres especiais. Dá um tremendo trabalho usar nomes com tais característica, apesar de possível. O ideal é termos nomes sem espaço (você pode usar ponto ou subscrito para separar palavras em um nome composto) e que contenham preferencialmente letras minísculas sem acento e números.
+Quando trabalhamos com dados que não coletamos, em geral, não vamos gostar dos nomes das variáveis que quem produziu os dados escolheu. Mais ainda, com certa frequência, obtemos dados cujos nomes das colunas são compostos ou contêm acentuação, cedilha e demais caracteres especiais. Dá um tremendo trabalho usar nomes com tais característica, apesar de possível. O ideal é termos nomes sem espaço (você pode usar ponto ou subscrito para separar palavras em um nome composto) e que contenham preferencialmente letras minísculas sem acento e números.
 
 Vamos começar renomeando algumas variáveis no nosso banco de dados, cujos nomes vemos com o comando abaixo:
 
@@ -212,7 +214,7 @@ Vamos começar renomeando algumas variáveis no nosso banco de dados, cujos nome
 names(escolas)
 ```
 
-O primeiro argumento da função _rename_ deve ser a base de dados cujos nomes das variáveis serão renomeados. Depois da primeira vírgula, inserimos todos as modificações de nomes, novamente separadas por vírgulas, e da seguinte maneira. Exemplo: nome\_novo = nome\_velho. Exemplo: nome\_novo = Nome_Velho. Veja o exemplo, em que damos novos nomes às variáveis "tipoesc", "latitute" e "longitude":
+O primeiro argumento da função _rename_ deve ser o objeto cujos nomes das variáveis serão renomeados. Depois da primeira vírgula, inserimos todas as modificações de nomes, novamente separadas por vírgulas, e da seguinte maneira. Exemplo 1: nome\_novo = nome\_velho. Exemplo 2: nome\_novo = Nome_Velho. Veja o exemplo abaixo, em que damos novos nomes às variáveis "tipoesc", "latitute" e "longitude":
 
 ```{r}
 escolas <- rename(escolas, tipo = TIPOESC, lat = LATITUDE, lon = LONGITUDE)
@@ -233,7 +235,7 @@ escolas <- escolas %>%
          lon = LONGITUDE)
 ```
 
-Usando o operador %>%, denominado _pipe_, retiramos de dentro da função _rename_ o banco de dados cujas variáveis serão renomeadas. As quebras de linha depois do %>% e dentro da função _rename_ são opcionais. Porém, o pardão é 'verticalizar o código' e colcar os 'verbos' à esquerda, o que torna sua leitura mais confortável.
+Usando o operador %>%, denominado _pipe_, retiramos de dentro da função _rename_ o data frame cujas variáveis serão renomeadas. As quebras de linha depois do %>% e dentro da função _rename_ são opcionais. Porém, o pardão é 'verticalizar o código' e colcar os 'verbos' à esquerda, o que torna sua leitura mais confortável.
 
 Compare com o código que havíamos executado anteriormente:
 
@@ -273,7 +275,9 @@ Algumas colunas podem ser dispensáveis em nosso banco de dados a depender da an
 escolas <- select(escolas, dre_abreviatura, codigo, tipo, nome, dre, lat, lon, codigo_inep)
 ```
 
-ou usando o operador %>%, chamado __pipe__,
+ou usando o operador %>%, chamado __pipe__.
+
+Nota: o operador |> agora é nativo de R, mas tanto faz utilizar |> ou %>%). Nos tutoriais vamos ficar com a forma antiga %>%
 
 ```{r}
 escolas <- escolas %>%
@@ -296,7 +300,8 @@ A grande vantagem de trabalharmos com o operador %>% é não precisar repetir o 
 Vejamos agora como usamos o operador %>% para "emendar" tarefas, começando da abertura desde dados. Note que o primeiro input é o url da base de dados e, que, uma vez carregados, vai sendo transformado a cada novo verbo.
 
 ```{r}
-escolas <- read_csv2(url_escolas) %>%
+escolas <- url_escolas %>%
+  read_csv2() %>%
   rename(dre_abreviatura = DRE,
          codigo = CODESC,
          tipo = TIPOESC,
@@ -315,27 +320,21 @@ escolas <- read_csv2(url_escolas) %>%
          codigo_inep)
 ```
 
-Em uma única sequência de operações, abrimos os dados, alteramos os nomes das variáveis e selecionamos as que permaneceriam no banco de dados. Esta forma de programa, tenha certeza, é bastante mais econômica e mais fácil de ler, para que possamos identificar erros mais facilmente.
+Em uma única sequência de operações, abrimos os dados, alteramos os nomes das variáveis e selecionamos as que permaneceriam no banco de dados. Esta forma de programa,r tenha certeza, é bastante mais econômica e mais fácil de ler, pois podemos identificar erros mais facilmente.
 
 ## Transformando variáveis
 
 Usaremos a função _mutate_ para operar transformações nas variáveis existentes e criar variáveis novas. Há inúmeras transformações possíveis e elas lembram bastante as funções de outros softwares, como MS Excel. Vamos ver algumas das mais importantes.
 
-No nosso caso, o formato dos valores de latitude e longitude estão em formato diferente do convenional. Latitudes são representadas por números entre -90 e 90, com 8 casas decimais, e Longitudes por números entre -180 e 180, também com 8 casas decimais. Em nosso par de variáveis, latitude está sem separador de decimal está omitido. Faremos a correção divindo latitude por 1 milhão.
-
-No caso de longitude, a situação é ainda pior. Há vários separadores e a variável foi lida como texto. Teremos que limpar todos os separadores, transformar a variável em número e, ao final, dividir por 1 milhão para colocar o separador no lugar certo.
+No nosso caso, o formato dos valores de latitude e longitude estão em formato diferente do convenional. Latitudes são representadas por números entre -90 e 90, com 8 casas decimais, e Longitudes por números entre -180 e 180, também com 8 casas decimais. Em nosso par de variáveis, latitude está sem separador de decimal está omitido. Faremos a correção divindo latitude e lonmgitude por 1 milhão.
 
 ```{r}
 escolas <- escolas %>% 
   mutate(lat = lat / 1000000, 
-         lon = str_replace_all(lon, "\\.", ""),
-         lon = as.numeric(lon),
          lon = lon / 1000000) 
 ```
 
 Como utilizamos os nomes das próprias variáveis à esquerda da operação de transformação, produziremos uma substituição e não haverá novas colunas na base de dados.
-
-Voltaremos ao verbo _mutate_ no próximo tutorial e no exemplos abaixo. 
 
 ## Filtrando linhas
 
@@ -363,7 +362,9 @@ Vamos supor que queremos estabelecer agora condições para a seleção de linha
 creches <- escolas %>% 
   filter(tipo == "CEI DIRET" | 
             tipo == "CEI INDIR" | 
-            tipo == "CR.P.CONV")
+            tipo == "CR.P.CONV" &
+            dre == "DIRETORIA REGIONAL DE EDUCACAO IPIRANGA")
+
 
 ```
 
