@@ -1,39 +1,42 @@
 # Tutorial — Proposições da Câmara: da API ao corpus de PDFs (com R)
 
+Neste tutorial, voltado às pessoas já habituadas à linguagem nos primeiros encontros, vamos trabalhar com dados de proposições de Projeto de Lei na Câmara dos Deputados, criando um corpus a partir dos dados obtidos na API da Câmara, passando pelo download dos arquivos até a organização de um corpus.
+
 > **Resumo do que vamos fazer**
 >
-> 1. Consultar a API da Câmara para listar **PLs de 2025**;
-> 2. Para cada **id**, buscar o **detalhe** (status, ementa, url do inteiro teor…);
+> 1. Consultar a API da Câmara para listar os **PLs de 2025**;
+> 2. Buscar os metadados de cada proposição e obter os **id** e endereços dos arquivos originais das proposições de inteiro teor;
 > 3. **Baixar** os PDFs de inteiro teor;
-> 4. Ler os PDFs com `pdftools` e montar um **corpus** para análises textuais.
-
-> Dica de estilo: vou manter a mesma pegada “tutorial passo-a-passo + comentários no código” que você usa — com pequenas pausas pra reflexão e micro-exercícios — como nos tutoriais de API, PDF, tidytext e stringr do seu curso.    
+> 4. Construir um **corpus** a partir dos pdfs para análises textuais.
 
 ---
 
 ## 0) Preparação do ambiente
 
-Vamos começar “limpando a casa” e carregando os pacotes. Tudo que não for essencial fica de fora por agora; adicionamos depois se precisar.
+Vamos começar carregando os pacotes que vamos utulizar
 
 ```r
 # zera o ambiente (opcional)
 rm(list = ls())
 
 # pacotes
-library(httr2)     # requests HTTP modernos e simples
-library(jsonlite)  # parse de JSON quando precisar
+library(httr2)     # requests HTTP
+library(jsonlite)  # parse de JSON
 library(tidyverse) # dplyr, purrr, tibble, stringr etc.
 library(pdftools)  # leitura de PDFs
 library(stringr)   # utilidades de texto complementares
-library(tidytext)  # (opcional) análises textuais depois
+library(tidytext)  # análises textuais depois da constucao do corpus
 ```
 
 ---
 
-## 1) Puxando a **lista simples** de proposições (PL, 2025) via API
+## 1) API da Câmara dos Deputados - obtendo as proposições de PLs de 2025
 
-A API da Câmara é bem razoável de usar: montamos uma requisição com `req_url_query()` e pedimos `Accept: application/json`. O retorno traz um campo `dados` com as proposições “básicas”. Essa etapa espelha seu estilo no tutorial de APIs (organizar endpoint, parâmetros e depois parsear), só que agora com `httr2` em vez de `httr`. 
+Nosso primeiro objeto é entender como funciona uma API. Antes de avançar, visite a página da [API de Dados Abertos da Câmara dos Deputados](https://dadosabertos.camara.leg.br/swagger/api.html)
 
+Para obter os dados das proposições de PLs de 2025, vamos utilizar o endpoint `/proposicoes` com os parâmetros de sigla do tipo de propisição, ano e mais alguns parâmetros obrigatórios. Vamos limitar a 100 itens.
+
+A API da Câmara é bem simples de usar em R: vamos construir uma requisição no endpoint com `hhtr::request`, e com com `req_headers` e `req_url_query()` vamos informar o que mais vai no "header" e nos parâmetros da requisição. `req_perform` exexuta o request. O retorno, em formato json, traz um campo `dados` com as informações básicas das proposições.
 ```r
 req <- request("https://dadosabertos.camara.leg.br/api/v2/proposicoes") |>
   req_headers(Accept = "application/json") |>
@@ -52,15 +55,15 @@ df_proposicoes_simples <- as_tibble(props)
 glimpse(df_proposicoes_simples)
 ```
 
-> **Nota rápida sobre paginação**: se você quiser **mais que 100** registros, inclua o parâmetro `pagina` em loop — a mesma lógica de loops que você ensina nos exercícios com sequências (ver Tutorial 5). 
+> **Nota rápida sobre paginação da API**: se você quiser **mais que 100** registros, inclua o parâmetro `pagina` em loop. 
+
+O resultado do processo é um data frame que contém uma informação essencial para o próximo passo, que é o **id** da inspeção. Vamos agora utilizar estes ids em outro endpoint da API para obter informações detalhadas das proposições
 
 ---
 
 ## 2) Função para buscar o **detalhe** de uma proposição
 
-Agora, para cada `id` da etapa anterior, buscamos o detalhe em `/proposicoes/{id}`. A função abaixo retorna um `tibble` “achatado” com campos úteis, incluindo **status de tramitação** e o **`urlInteiroTeor`** (quando houver).
-
-> Repare nas escolhas de tratamento de `NULL` com `%||%` e no uso de `purrr::possibly()` pra robustez — o mesmo espírito que você já usa nos tutoriais de raspagem quando uma página pode falhar: seguimos o baile e coletamos o que der. 
+Agora, para cada `id` da etapa anterior, buscamos o detalhe no endpoint `/proposicoes/{id}`. A função abaixo retorna um `tibble` “achatado” com campos úteis, incluindo o **`urlInteiroTeor`**, que é o endereço que contém o documento da proposição.
 
 ```r
 obter_proposicao_detalhe <- function(id) {
@@ -96,9 +99,19 @@ obter_proposicao_detalhe <- function(id) {
   )
 }
 
-safe_obter_proposicao_detalhe <- purrr::possibly(obter_proposicao_detalhe, otherwise = NULL)
+```
 
-# iteramos com uma pequena pausa por respeito à API
+> Repare nas escolhas de tratamento de `NULL` com `%||%` e no uso de `purrr::possibly()` pra evitar erros. `purrr::possibly()` contribui para evitar quebra do código quando uma página pode falhar, ou seja, seguimos e coletamos o que der. 
+
+```r
+
+safe_obter_proposicao_detalhe <- purrr::possibly(obter_proposicao_detalhe, otherwise = NULL)
+```
+
+Com `purrr::map_df` vamos aplicar a função a todos os ids das proposições coletadas na seção anterior, dando um intervalo de 0,1 segundo para não sobrecarregar a API. `purrr::map_df` já retorna todos os dataframes coletados com `obter_proposicao_detalhe` em um único data frame, facilitando nossa vida:
+
+```r
+
 df_proposicoes <- purrr::map_df(df_proposicoes_simples$id, function(x) {
   Sys.sleep(0.1)
   safe_obter_proposicao_detalhe(x)
@@ -107,16 +120,17 @@ df_proposicoes <- purrr::map_df(df_proposicoes_simples$id, function(x) {
 glimpse(df_proposicoes)
 ```
 
-**Exercício relâmpago:** acrescente uma coluna booleana `tem_pdf = nzchar(urlInteiroTeor)` e faça um `count(tem_pdf)` para ver quantas têm/ não têm PDF.
+O resultado é um novo data frame que contém um grande conjunto de dados das proposições.
 
 ---
 
 ## 3) **Baixar** os PDFs de inteiro teor
 
-Vamos criar uma função simples de download. Mantenho `tryCatch` e uma versão “safe” com `possibly` — padrão robusto que você curte nos seus tutoriais de raspagem e formulários.  
+Com os urls dos documentos de inteiro teor, podemos fazer o download da coleção completa dos dados. Vamos criar uma função simples de download. Vamos usar `tryCatch` e uma versão “safe” com `possibly` para eveitar novamente quebra do código.  Cada arquivo será salvo com o nome "id" + ".pdf", para podermos associar às proposições por id.
 
 ```r
 baixar_inteiro_teor <- function(id, url, diretorio = "inteiro_teor") {
+  
   if (is.null(url) || !nzchar(url)) return(invisible(NULL))  # sem URL, sem download
 
   if (!dir.exists(diretorio)) dir.create(diretorio)
@@ -132,25 +146,29 @@ baixar_inteiro_teor <- function(id, url, diretorio = "inteiro_teor") {
 
 safe_baixar_inteiro_teor <- purrr::possibly(baixar_inteiro_teor, otherwise = NULL)
 
-# loop de downloads (com pausa curtinha)
+```
+
+Com `purrr::walk` aplicamos `baixar_inteiro_teor` a todos os ids, fazendo o download de todos nos arquvios no diretório "inteiro_teor" que vamos criar.
+
+```r
+dir.create("inteiro_teor")
+
 purrr::walk(df_proposicoes$id, function(x){
   Sys.sleep(0.1)
   url_pdf <- df_proposicoes %>% filter(id == x) %>% pull(urlInteiroTeor) %>% .[[1]]
   safe_baixar_inteiro_teor(x, url_pdf, "inteiro_teor")
 })
 
-# checagem rápida
 arquivos <- list.files("inteiro_teor", pattern = "\\.pdf$")
+
 length(arquivos); head(arquivos, 10)
 ```
-
-> **Observação**: quando falamos de baixar arquivos em massa e nomear certinho, a sua metodologia é a mesma que aparece nos tutoriais de web scraping e também quando você pega PDFs científicos/relatórios (nome vindo do id; `unique()` quando necessário; checagens de existência etc.).  
 
 ---
 
 ## 4) Lendo os PDFs com `pdftools` e montando um **corpus**
 
-Agora a parte gostosa: transformar dezenas/centenas de PDFs em uma única tabela com **id**, **número de páginas**, **texto completo** e **tamanho** (em caracteres). A estratégia de “ler todas as páginas, colar com `collapse = '\n'` e construir um tibble” segue exatamente a prática dos seus exercícios de PDF. 
+Agora a parte final da coleta dos dados: transformar os PDFs baixados em uma única tabela com **id**, **número de páginas**, **texto completo** e **tamanho** (em caracteres). Para termos um texto único para proposição, e não um vetor que contém o texto de cada página, vamos "colar" os textos extraídos com `collapse = '\n'`. No que estamos presumindo que os documentos tem OCR (para 2025 isso é um pressuposto aceitável). Caso os documentos não tenham caracteres reconhecíveis, temos que aplicar uma função de OCR antes de extrair o texto. **corpus_docs** contém o resultado:
 
 ```r
 ler_pdf <- function(arquivo_pdf, pasta = "inteiro_teor") {
@@ -170,7 +188,9 @@ corpus_docs <- purrr::map_dfr(arquivos, ler_pdf)
 glimpse(corpus_docs)
 ```
 
-**(Opcional)**: já dá pra brincar com `tidytext` neste ponto — tokenização, remoção de stopwords, contagens etc., como você mostra nos tutoriais 12 e 13. Abaixo vai um aquecimento bem curto, só pra validar o corpus.  
+---
+
+## 5) **(Opcional)**: já dá pra brincar com `tidytext` neste ponto, fazendo tokenização, remoção de stopwords, contagens etc.
 
 ```r
 stop_pt <- stopwords::stopwords("pt")
@@ -187,135 +207,4 @@ top_palavras <- tokens %>%
 top_palavras
 ```
 
-> Dica: se quiser padronizar antes (minúsculas, remover pontuação, tirar acentos), reaproveite o pipeline do Tutorial 12 (`str_to_lower`, `str_remove_all("[:punct:]")`, função `remove_acentos`) antes de tokenizar. Isso costuma deixar o corpus redondinho. 
-
----
-
-## 5) Robustez, paginação e pequenas melhorias
-
-* **Paginação**: a API retorna 100 por página. Para varrer tudo, faça um loop em `pagina = 1:n` enquanto `length(dados) > 0`. É a mesma lógica do seu loop de páginas (sequências) — só que aqui o “contador” é o parâmetro `pagina`. 
-* **Falhas de rede**: além de `possibly()`, você pode implementar **backoff** simples (tentar 3x com `Sys.sleep()` exponencial).
-* **Checagem de PDF**: alguns `urlInteiroTeor` podem apontar para HTML/indisponível. Um try pequeno já resolve.
-* **Versões**: salve `df_proposicoes` e `corpus_docs` com `write_csv()`/`write_rds()` pra não ter que re-rodar tudo.
-
----
-
-## 6) Tarefinhas (pra se acostumar com o fluxo)
-
-1. **Contar por situação**: do `df_proposicoes`, crie um `count(status_descricaoSituacao, sort = TRUE)`.
-2. **Filtrar só quem tem PDF** e refaça o corpus.
-3. **Limpeza textual extra**: padronize o texto do corpus com o mini-pipeline do seu Tutorial 12 antes de tokenizar. Compare as 30 palavras mais frequentes **antes x depois**. 
-4. **Bigrams**: gere bigrams com `unnest_tokens(bigram, text, token = "ngrams", n = 2)` e filtre stopwords como no Tutorial 13. Quais são as duplas mais comuns? 
-
----
-
-## 7) Código completo (copiar/colar)
-
-```r
-# --- Setup ---
-rm(list = ls())
-library(httr2)
-library(jsonlite)
-library(tidyverse)
-library(pdftools)
-library(stringr)
-library(tidytext)
-library(stopwords)
-
-# --- 1) Lista simples (PL/2025) ---
-req <- request("https://dadosabertos.camara.leg.br/api/v2/proposicoes") |>
-  req_headers(Accept = "application/json") |>
-  req_url_query(siglaTipo = "PL", ano = 2025, ordem = "ASC", ordenarPor = "id", itens = 100)
-
-resp  <- req_perform(req)
-props <- resp_body_json(resp, simplifyVector = TRUE)$dados
-df_proposicoes_simples <- as_tibble(props)
-
-# --- 2) Detalhes por id ---
-obter_proposicao_detalhe <- function(id) {
-  req  <- request(paste0("https://dadosabertos.camara.leg.br/api/v2/proposicoes/", id))
-  resp <- req_perform(req)
-  p <- resp_body_json(resp, simplifyVector = TRUE)$dados
-  s <- p$statusProposicao %||% list()
-  tibble(
-    id = p$id %||% NA_integer_,
-    siglaTipo = p$siglaTipo %||% NA_character_,
-    numero = p$numero %||% NA_integer_,
-    ano = p$ano %||% NA_integer_,
-    descricaoTipo = p$descricaoTipo %||% NA_character_,
-    ementa = p$ementa %||% NA_character_,
-    ementaDetalhada = p$ementaDetalhada %||% NA_character_,
-    keywords = p$keywords %||% NA_character_,
-    dataApresentacao = p$dataApresentacao %||% NA_character_,
-    urlInteiroTeor = p$urlInteiroTeor %||% NA_character_,
-    uriAutores = p$uriAutores %||% NA_character_,
-    status_dataHora = s$dataHora %||% NA_character_,
-    status_sequencia = s$sequencia %||% NA_integer_,
-    status_siglaOrgao = s$siglaOrgao %||% NA_character_,
-    status_regime = s$regime %||% NA_character_,
-    status_descricaoTramitacao = s$descricaoTramitacao %||% NA_character_,
-    status_codTipoTramitacao = s$codTipoTramitacao %||% NA_character_,
-    status_descricaoSituacao = s$descricaoSituacao %||% NA_character_,
-    status_codSituacao = s$codSituacao %||% NA_integer_,
-    status_despacho = s$despacho %||% NA_character_,
-    status_ambito = s$ambito %||% NA_character_,
-    status_apreciacao = s$apreciacao %||% NA_character_
-  )
-}
-safe_obter_proposicao_detalhe <- purrr::possibly(obter_proposicao_detalhe, otherwise = NULL)
-
-df_proposicoes <- purrr::map_df(df_proposicoes_simples$id, function(x) {
-  Sys.sleep(0.1)
-  safe_obter_proposicao_detalhe(x)
-})
-
-# --- 3) Download dos PDFs ---
-baixar_inteiro_teor <- function(id, url, diretorio = "inteiro_teor") {
-  if (is.null(url) || !nzchar(url)) return(invisible(NULL))
-  if (!dir.exists(diretorio)) dir.create(diretorio)
-  destino <- file.path(diretorio, paste0(id, ".pdf"))
-  req  <- request(url)
-  resp <- tryCatch(req_perform(req), error = function(e) e)
-  if (inherits(resp, "error")) return(invisible(NULL))
-  writeBin(resp_body_raw(resp), destino)
-}
-safe_baixar_inteiro_teor <- purrr::possibly(baixar_inteiro_teor, otherwise = NULL)
-
-purrr::walk(df_proposicoes$id, function(x){
-  Sys.sleep(0.1)
-  url_pdf <- df_proposicoes %>% filter(id == x) %>% pull(urlInteiroTeor) %>% .[[1]]
-  safe_baixar_inteiro_teor(x, url_pdf, "inteiro_teor")
-})
-
-arquivos <- list.files("inteiro_teor", pattern = "\\.pdf$")
-
-# --- 4) Ler PDFs e montar corpus ---
-ler_pdf <- function(arq, pasta = "inteiro_teor") {
-  paginas <- pdftools::pdf_text(file.path(pasta, arq))
-  tibble(
-    id = str_replace(arq, "\\.pdf$", ""),
-    n_paginas = length(paginas),
-    text = paste(paginas, collapse = "\n"),
-    n_caracteres = nchar(text)
-  )
-}
-corpus_docs <- purrr::map_dfr(arquivos, ler_pdf)
-
-# --- 5) (Opcional) Primeiros tokens ---
-stop_pt <- stopwords::stopwords("pt")
-tokens <- corpus_docs %>%
-  select(id, text) %>%
-  unnest_tokens(word, text) %>%
-  filter(!word %in% stop_pt, str_detect(word, "[[:alpha:]]"))
-
-top_palavras <- tokens %>% count(word, sort = TRUE) %>% slice_head(n = 30)
-top_palavras
-```
-
----
-
-### Fechamento
-
-Com esse pipeline você sai da **API** direto para um **corpus de PDFs** pronto para exploração textual. A arquitetura é a mesma que você já domina nos seus tutoriais: **requisição → iteração segura → download nomeado → leitura batelada → data frame canônico** — e, se quiser, emenda **`stringr`** pra limpeza e **`tidytext`** pra análise.    
-
-Se quiser, eu já adapto o texto pra **RMarkdown/Quarto** com sumário, `code_folding` e seção de “tarefas”, no mesmo formato dos seus PDFs do curso.
+> Dica: se quiser padronizar antes (minúsculas, remover pontuação, tirar acentos), reaproveite o pipeline do Tutorial 12 (`str_to_lower`, `str_remove_all("[:punct:]")`, função `remove_acentos`) antes de tokenizar. Isso costuma deixar o corpus mais fácil de trabalhar. 
