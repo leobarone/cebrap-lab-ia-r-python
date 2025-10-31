@@ -20,4 +20,4 @@ No primeiro encontro houve 2 caminhos possíveis a depender do seu interesse e/o
 
 Neste segundo encontro trabalharemos comn um tutorial que pode ser feito imadiatamente após o tutorial, mas cujos dados foram coletados no exercício de construção de um corpus de textos legislativos utilizando a API da Câmara dos Deputados. O tema é "texto como dado" e vamos ver como manipular textos para prepará-los para a análise.
 
-3 - Preparação de texto como dados: [tutorial em R](https://github.com/leobarone/cebrap-lab-ia-r-python/blob/main/tutorial/tutorial-textos-em-r.md) [tutorial em python]()
+3 - Preparação de texto como dados: [tutorial em R](https://github.com/leobarone/cebrap-lab-ia-r-python/blob/main/tutorial/tutorial-textos-em-r.md) [tutorial em python](https://github.com/leobarone/cebrap-lab-ia-r-python/blob/main/tutorial/tutorial-textos-python.ipynb)
