@@ -1,5 +1,12 @@
 # Tutorial Inicial - Manipulação de dados com **dplyr**
 
+NOVO URL DOS DADOS
+
+```{r}
+url_escolas <- 'https://raw.githubusercontent.com/leobarone/cebrap-lab-ia-r-python/refs/heads/main/tutorial/data/escola.csv'
+```
+
+
 Um dos aspectos mais incríveis da linguagem R é o desenvolvimento de novas funcionalidades pela comunidade de usuárias e usuários. 
 
 Há diversas "gramática para bases de dados", ou seja, formas de importar, organizar, manipular e extrair informações das bases de dados, que foram desenvolvidas ao longo da última década.
