@@ -32,10 +32,10 @@ Vamos utilizar os seguintes pacotes:
 Se ainda não tiver instalado tais pacotes, instale-os:
 
 ```{r}
-#install.package('stringr')
-#install.package('tidyverse')
-#install.package('tidytext')
-#install.package('tm')
+install.packages('stringr')
+install.packages('tidyverse')
+install.packages('tidytext')
+install.packages('tm')
 ```
 
 A seguir, carregue todos:
