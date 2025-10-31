@@ -54,8 +54,7 @@ Vamos agora carregar os textos que analisaremos. Há no curso um [tutorial sobre
 O *corpus* que vamos utilizar neste tutorial pode ser carregado diretamente fazendo:
 
 ```{r}
-# corpus_docs <- readr::read_csv2('https://github.com/leobarone/cebrap-lab-ia-r-python/blob/main/tutorial/data/corpus_docs.csv')
-corpus_docs <- readr::read_csv2('data/corpus_docs.csv') %>% 
+corpus_docs <- readr::read_csv2('https://raw.githubusercontent.com/leobarone/cebrap-lab-ia-r-python/refs/heads/main/tutorial/data/corpus_docs.csv') %>%
   rename(texto = text)
 ```
 ---
