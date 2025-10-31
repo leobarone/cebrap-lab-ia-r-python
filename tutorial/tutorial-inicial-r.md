@@ -3,7 +3,7 @@
 NOVO URL DOS DADOS
 
 ```{r}
-url_escolas <- 'https://raw.githubusercontent.com/leobarone/cebrap-lab-ia-r-python/refs/heads/main/tutorial/data/escola.csv'
+url_escolas <- 'https://raw.githubusercontent.com/leobarone/cebrap-lab-ia-r-python/refs/heads/main/tutorial/data/escolas.csv'
 ```
 
 
