@@ -17,7 +17,7 @@ library(tidyverse)  # carrega readr, stringr, ggplot2, etc.
 url_escolas <- "https://dados.prefeitura.sp.gov.br/dataset/8da55b0e-b385-4b54-9296-d0000014ddd5/resource/533188c6-1949-4976-ac4e-acd313415cd1/download/escolas122024.csv"
 
 # 3) Abertura dos dados
-escolas <- read_csv2(url_escolas)
+escolas <- read_csv2('tutorial/data/escolas.csv')
 
 # 4) Exploração inicial (sem olhar a matriz inteira)
 # View(escolas)  # opcional e interativo; comente ou descomente conforme preferir

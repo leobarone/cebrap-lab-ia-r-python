@@ -1,12 +1,5 @@
 # Tutorial Inicial - Manipulação de dados com **dplyr**
 
-NOVO URL DOS DADOS
-
-```{r}
-url_escolas <- 'https://raw.githubusercontent.com/leobarone/cebrap-lab-ia-r-python/refs/heads/main/tutorial/data/escolas.csv'
-```
-
-
 Um dos aspectos mais incríveis da linguagem R é o desenvolvimento de novas funcionalidades pela comunidade de usuárias e usuários. 
 
 Há diversas "gramática para bases de dados", ou seja, formas de importar, organizar, manipular e extrair informações das bases de dados, que foram desenvolvidas ao longo da última década.
@@ -108,7 +101,9 @@ Use o recurso "Import Dataset" enquanto não se sentir confortável com a lingua
 Repetindo o procedimento com código, para abrir o cadastro de escola basta fazer:
 
 ```{r}
-escolas <- read_csv2("https://dados.prefeitura.sp.gov.br/dataset/8da55b0e-b385-4b54-9296-d0000014ddd5/resource/533188c6-1949-4976-ac4e-acd313415cd1/download/escolas122024.csv")
+url_escolas <- "https://dados.prefeitura.sp.gov.br/dataset/8da55b0e-b385-4b54-9296-d0000014ddd5/resource/533188c6-1949-4976-ac4e-acd313415cd1/download/escolas122024.csv"
+
+escolas <- read_csv2(url_escolas)
 ```
 
 Em R, as funções "read." são as funções de abertura de dados do _base_ e as funções "read_" são as análogas do pacote _readr_, parte do _tidyverse_. Há funções "read" para abrir/ler/carregar todos os tipos de dados, de arquivos de texto a páginas em HTML.

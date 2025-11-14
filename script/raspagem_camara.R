@@ -111,4 +111,6 @@ ler_pdf <- function(arquivo) {
 
 corpus_docs <- map_dfr(arquivos, ler_pdf)
 
+corpus_docs %>% write_csv2('corpus.csv')
+
 glimpse(corpus_docs)
