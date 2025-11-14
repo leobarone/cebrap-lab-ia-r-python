@@ -1,6 +1,6 @@
 # cebrap.lab - IA em R e python
 
-## 1o encontro
+## 3o encontro
 
 Data: 14 de Novembro de 2025
 Horário: 17 às 19h
