@@ -190,10 +190,9 @@ Baseia-se em **NLI** (entailment/contradiction). Montamos frases do tipo: “Est
 Como depende do *verbalizer* (a forma da frase), é comum calibrar *templates* e thresholds por rótulo.
 
 ```{r}
-library(reticulate)
-
 transformers <- import("transformers")
 hf_pipeline  <- transformers$pipeline
+
 
 clf <- hf_pipeline(
   "zero-shot-classification",
@@ -217,8 +216,6 @@ cat("Este discurso é sobre", best_label, ".\n")
 Podemos utilizar modelos de classificação única (*single label*), como acabamos de fazer, ou multinomial (*multi-label*), como abaixo:
 
 ```{r}
-library(reticulate)
-
 transformers <- import("transformers")
 hf_pipeline  <- transformers$pipeline
 
@@ -398,21 +395,11 @@ generator(prompt, max_new_tokens = 100L)
 Ne exemplo vamos utilizar o corpus dos PLs da Câmara dos Deputados
 
 ```{r}
-library(readr)
+library(tidyverse)
 
-CSV_PATH <- "corpus.csv"
-df <- read_csv(
-  CSV_PATH,
-  show_col_types = FALSE,
-  progress = FALSE
-)
+df  <- read_csv2("corpus.csv", n_max = 10)
 
-# Para manter o exemplo leve, usamos apenas as 10 primeiras linhas:
-df <- head(df, 10)
-
-stopifnot("text" %in% names(df))
-
-head(df, 3)
+df %>% head
 ```
 
 #### Funcionamento
