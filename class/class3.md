@@ -18,5 +18,6 @@ Neste encontro espera-se que você tenha finalizado os tutoriais de exposição 
 
 Opcionalmente, você poderá ter feito o exercício de construção de um corpus de textos legislativos utilizando a API da Câmara dos Deputados [em R](https://github.com/leobarone/cebrap-lab-ia-r-python/blob/main/tutorial/tutorial-proposicoes-legislativas-r.md) ou [em python](https://github.com/leobarone/cebrap-lab-ia-r-python/blob/main/tutorial/tutorial-proposicoes-legislativas-python.ipynb)
 
-Agora vamos trabalhar todo mundo junto num tutorial mais expositivo sobre diferentes técnicas de LLM (ou mais rigorosamente, LLMs ou encoders de linguagem) para produzir a preparação de dados ou classificação no contexto de pesquisa a partir de conjuntos de texto. Tutorial [em python](https://github.com/leobarone/cebrap-lab-ia-r-python/blob/main/tutorial/tutorial-tecnicas-llm-para-pesquisa
-.ipynb)
+Agora vamos trabalhar todo mundo junto num tutorial mais expositivo sobre diferentes técnicas de LLM (ou mais rigorosamente, LLMs ou encoders de linguagem) para produzir a preparação de dados ou classificação no contexto de pesquisa a partir de conjuntos de texto. Tutorial [em R](https://github.com/leobarone/cebrap-lab-ia-r-python/blob/main/tutorial/tutorial-tecnicas-llm-para-pesquisa
+.mp) e [em python](https://github.com/leobarone/cebrap-lab-ia-r-python/blob/main/tutorial/tutorial-tecnicas-llm-para-pesquisa
+.ipynb) 
