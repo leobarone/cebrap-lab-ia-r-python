@@ -2,3 +2,8 @@
 .Rhistory
 .RData
 .Ruserdata
+
+.ipynb_checkpoints/
+out/
+*.pt
+*.safetensors
