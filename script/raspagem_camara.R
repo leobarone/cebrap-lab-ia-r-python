@@ -1,4 +1,4 @@
-rm(list=ls())
+rm(list = ls())
 library(httr2)
 library(jsonlite)
 library(tidyverse)
@@ -8,23 +8,62 @@ library(tidytext)
 library(stopwords)
 library(stringi)
 
-
-req <- request("https://dadosabertos.camara.leg.br/api/v2/proposicoes") |>
+# 1) Requisição base (primeira página)
+base_req <- request("https://dadosabertos.camara.leg.br/api/v2/proposicoes") |>
   req_headers(Accept = "application/json") |>
   req_url_query(
     siglaTipo = "PL",
-    ano = 2025,
-    ordem = "ASC",
+    ano       = 2025,
+    ordem     = "ASC",
     ordenarPor = "id",
-    itens = 100,
+    itens     = 100,   # máximo por página
+    pagina    = 1
   )
 
-resp <- req_perform(req)
-props <- resp_body_json(resp, simplifyVector = TRUE)$dados
-df_proposicoes_simples <- as_tibble(props)
+# Função auxiliar para baixar 1 página
+get_page <- function(req) {
+  resp  <- req_perform(req)
+  body  <- resp_body_json(resp, simplifyVector = TRUE)
+  
+  dados <- as_tibble(body$dados)
+  
+  # 'links' vem como data.frame com colunas rel, href, type
+  links <- as_tibble(body$links)
+  
+  list(dados = dados, links = links)
+}
+
+# 2) Loop de paginação: segue o link "next" até acabar
+paginas   <- list()
+pagina_atual_req <- base_req
+i <- 1
+
+repeat {
+  cat("Baixando página", i, "...\n")
+  pg <- get_page(pagina_atual_req)
+  
+  # guarda dados da página
+  paginas[[i]] <- pg$dados
+  
+  # tenta achar link "next"
+  next_href <- pg$links |>
+    filter(rel == "next") |>
+    pull(href)
+  
+  # se não há "next", terminou
+  if (length(next_href) == 0) break
+  
+  # monta nova requisição a partir do href retornado
+  pagina_atual_req <- request(next_href) |>
+    req_headers(Accept = "application/json")
+  
+  i <- i + 1
+}
+
+# 3) Junta tudo em um único tibble
+df_proposicoes_simples <- bind_rows(paginas)
 
 glimpse(df_proposicoes_simples)
-
 
 
 obter_proposicao_detalhe <- function(id) {
@@ -68,6 +107,7 @@ obter_proposicao_detalhe <- function(id) {
 safe_obter_proposicao_detalhe <- possibly(obter_proposicao_detalhe, otherwise = NULL)
 
 df_proposicoes <- map_df(df_proposicoes_simples$id, function(x) {
+  print(x)
   Sys.sleep(0.1)
   safe_obter_proposicao_detalhe(x)
 })
